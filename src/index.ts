@@ -8,14 +8,7 @@ import { defineRemindDailyTask } from "./functions";
 
 const PORT = process.env.PORT || 3333;
 
-let remindDailyTaskKey: string;
-
-// //TODO: improve this shit
-// if (!process.env.DAILY_TIME) {
-//   remindDailyTaskKey = "";
-// } else {
-remindDailyTaskKey = defineRemindDailyTask();
-// }
+const remindDailyTaskKey = defineRemindDailyTask();
 
 const app = express();
 

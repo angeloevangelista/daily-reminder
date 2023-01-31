@@ -4,12 +4,20 @@ import * as tasks from "../tasks";
 function getRemindDailyTaskExpression(): string {
   const [dailyHour, dailyMinute] = process.env.DAILY_TIME!.split(":");
 
-  let dailyMinutesToSendReminder = Number(dailyMinute);
+  const minutesToDiscountOnReminder = 5;
+
+  let dailyMinutesToSendReminder =
+    Number(dailyMinute) - minutesToDiscountOnReminder;
+
   let dailyHourToSendReminder = Number(dailyHour);
 
-  if (dailyMinutesToSendReminder === 0) {
-    dailyMinutesToSendReminder = 60 - 1;
-    dailyHourToSendReminder = dailyHourToSendReminder - 5;
+  if (dailyMinutesToSendReminder < 0) {
+    dailyMinutesToSendReminder = 60 + dailyMinutesToSendReminder;
+    dailyHourToSendReminder = dailyHourToSendReminder - 1;
+  }
+
+  if (dailyHourToSendReminder < 0) {
+    dailyHourToSendReminder = 24 + dailyHourToSendReminder;
   }
 
   const formattedHour = String(dailyHourToSendReminder).padStart(2, "0");
@@ -27,7 +35,7 @@ function defineRemindDailyTask(): string {
 
   TaskScheduler.getInstance()
     .addTask(remindDailyTaskName, cronExpression, tasks.remindDailyTask)
-    .start();
+    .stop();
 
   return remindDailyTaskName;
 }

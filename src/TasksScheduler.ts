@@ -1,7 +1,17 @@
 import cron from "node-cron";
 
 type TasksMap = {
-  [key: string]: cron.ScheduledTask | undefined;
+  [key: string]:
+    | {
+        cronTask: cron.ScheduledTask;
+        active: boolean;
+      }
+    | undefined;
+};
+
+type TaskInfo = {
+  key: string;
+  active: boolean;
 };
 
 class TaskScheduler {
@@ -21,15 +31,17 @@ class TaskScheduler {
   }
 
   public pauseAllTasks(): void {
-    Object.values(this._tasksMap).forEach((task) => task?.stop());
+    Object.values(this._tasksMap).forEach((task) => {
+      task!.cronTask.stop();
+      task!.active = false;
+    });
   }
 
   public resumeAllTasks(): void {
-    Object.values(this._tasksMap).forEach((task) => task?.start());
-  }
-
-  public getTasks(): TasksMap {
-    return { ...this._tasksMap };
+    Object.values(this._tasksMap).forEach((task) => {
+      task!.cronTask.start();
+      task!.active = true;
+    });
   }
 
   public pauseTask(taskKey: string): void {
@@ -37,7 +49,8 @@ class TaskScheduler {
 
     if (!cronTask) throw new Error(`cron task "${taskKey}" not defined`);
 
-    cronTask.stop();
+    cronTask.cronTask.stop();
+    cronTask.active = false;
   }
 
   public resumeTask(taskKey: string): void {
@@ -45,7 +58,21 @@ class TaskScheduler {
 
     if (!cronTask) throw new Error(`cron task "${taskKey}" not defined`);
 
-    cronTask.start();
+    cronTask.cronTask.start();
+    cronTask.active = true;
+  }
+
+  public getTasks(): TaskInfo[] {
+    const tasksInfo: TaskInfo[] = [];
+
+    Object.entries(this._tasksMap).forEach(([taskKey, task]) => {
+      tasksInfo.push({
+        key: taskKey,
+        active: task!.active,
+      });
+    });
+
+    return tasksInfo;
   }
 
   public addTask(
@@ -58,7 +85,10 @@ class TaskScheduler {
       scheduled: false,
     });
 
-    this._tasksMap[taskKey] = cronTask;
+    this._tasksMap[taskKey] = {
+      active: false,
+      cronTask,
+    };
 
     return cronTask;
   }

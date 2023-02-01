@@ -33,9 +33,11 @@ function defineRemindDailyTask(): string {
 
   const cronExpression = getRemindDailyTaskExpression();
 
-  TaskScheduler.getInstance()
-    .addTask(remindDailyTaskName, cronExpression, tasks.remindDailyTask)
-    .stop();
+  TaskScheduler.getInstance().addTask(
+    remindDailyTaskName,
+    cronExpression,
+    tasks.remindDailyTask
+  );
 
   return remindDailyTaskName;
 }

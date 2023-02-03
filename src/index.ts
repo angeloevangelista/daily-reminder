@@ -1,5 +1,7 @@
 import "dotenv/config";
 
+import fs from "fs";
+import path from "path";
 import cors from "cors";
 import express from "express";
 
@@ -31,6 +33,20 @@ app.get("/api/env", async (request, response) => {
     dailyTime: process.env.DAILY_TIME,
     taskCronExpression: getRemindDailyTaskExpression(),
   });
+});
+
+app.get("/api/quotes", async (request, response) => {
+  try {
+    return response.json(
+      JSON.parse(
+        fs.readFileSync(path.resolve(__dirname, "quotes.json")).toString()
+      )
+    );
+  } catch (error) {
+    console.dir({ error }, { depth: null });
+  }
+
+  return response.status(201).send();
 });
 
 app.get("/api/events", async (request, response) => {

@@ -83,6 +83,7 @@ class TaskScheduler {
     const cronTask = cron.schedule(cronExpression, taskCallback, {
       name: taskKey,
       scheduled: false,
+      timezone: "America/Sao_Paulo",
     });
 
     this._tasksMap[taskKey] = {

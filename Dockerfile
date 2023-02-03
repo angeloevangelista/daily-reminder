@@ -10,6 +10,8 @@ COPY . .
 
 RUN yarn build
 
+RUN mv src/quotes.json ./dist/
+
 FROM node:16.13.1-alpine
 
 WORKDIR /app
@@ -19,7 +21,6 @@ COPY package.json yarn.lock ./
 RUN yarn install --production --frozen-lockfile
 
 COPY --from=builder /app-build/dist/ /app
-COPY --from=builder /app-build/quotes.json /app/quotes.json
 
 ENV PORT=3333
 ENV DAILY_TIME=00:00

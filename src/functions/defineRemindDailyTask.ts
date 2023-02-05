@@ -1,8 +1,10 @@
-import { TaskScheduler } from "../TasksScheduler";
-import * as tasks from "../tasks";
+import { exit } from "process";
 
-function getRemindDailyTaskExpression(): string {
-  const [dailyHour, dailyMinute] = process.env.DAILY_TIME!.split(":");
+import * as tasks from "../tasks";
+import { TaskScheduler } from "../TasksScheduler";
+
+function getRemindDailyTaskExpression(dailyTime: string): string {
+  const [dailyHour, dailyMinute] = dailyTime.split(":");
 
   const minutesToDiscountOnReminder = 5;
 
@@ -28,18 +30,30 @@ function getRemindDailyTaskExpression(): string {
   return cronExpression;
 }
 
-function defineRemindDailyTask(): string {
-  const remindDailyTaskName = "remind-daily-task";
+function defineRemindDailyTask() {
+  const dailyCollection = process.env.DAILY_COLLECTION?.split(";");
 
-  const cronExpression = getRemindDailyTaskExpression();
+  if (!dailyCollection) {
+    console.error(`Environment key "DAILY_COLLECTION" is not defined`);
+    exit(1);
+  }
 
-  TaskScheduler.getInstance().addTask(
-    remindDailyTaskName,
-    cronExpression,
-    tasks.remindDailyTask
-  );
+  dailyCollection
+    .filter((p) => p.trim())
+    .forEach((dailyDataString, index) => {
+      const [dailyTime, dailyLink, chatWebhookLink] =
+        dailyDataString.split(",");
 
-  return remindDailyTaskName;
+      const remindDailyTaskName = `remind-daily-task-${index}`;
+
+      const cronExpression = getRemindDailyTaskExpression(dailyTime);
+
+      TaskScheduler.getInstance().addTask(
+        remindDailyTaskName,
+        cronExpression,
+        () => tasks.remindDailyTask(dailyLink, chatWebhookLink)
+      );
+    });
 }
 
 export { defineRemindDailyTask, getRemindDailyTaskExpression };

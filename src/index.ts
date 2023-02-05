@@ -6,14 +6,11 @@ import cors from "cors";
 import express from "express";
 
 import { TaskScheduler } from "./TasksScheduler";
-import {
-  defineRemindDailyTask,
-  getRemindDailyTaskExpression,
-} from "./functions";
+import { defineRemindDailyTask } from "./functions";
 
 const PORT = process.env.PORT || 3333;
 
-const remindDailyTaskKey = defineRemindDailyTask();
+defineRemindDailyTask();
 
 const app = express();
 
@@ -26,14 +23,6 @@ app.get("/api/health", (_, response) =>
     timestamp: new Date().toISOString(),
   })
 );
-
-app.get("/api/env", async (request, response) => {
-  return response.json({
-    dailyLink: process.env.DAILY_INVITE_LINK,
-    dailyTime: process.env.DAILY_TIME,
-    taskCronExpression: getRemindDailyTaskExpression(),
-  });
-});
 
 app.get("/api/quotes", async (request, response) => {
   try {

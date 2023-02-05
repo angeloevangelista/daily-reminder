@@ -3,8 +3,9 @@ import cron from "node-cron";
 type TasksMap = {
   [key: string]:
     | {
-        cronTask: cron.ScheduledTask;
         active: boolean;
+        taskDefinition: string;
+        cronTask: cron.ScheduledTask;
       }
     | undefined;
 };
@@ -12,6 +13,7 @@ type TasksMap = {
 type TaskInfo = {
   key: string;
   active: boolean;
+  taskDefinition: string;
 };
 
 class TaskScheduler {
@@ -69,6 +71,7 @@ class TaskScheduler {
       tasksInfo.push({
         key: taskKey,
         active: task!.active,
+        taskDefinition: this._tasksMap[taskKey]?.taskDefinition || "???",
       });
     });
 
@@ -89,6 +92,7 @@ class TaskScheduler {
     this._tasksMap[taskKey] = {
       active: false,
       cronTask,
+      taskDefinition: cronExpression,
     };
 
     return cronTask;
